@@ -1,42 +1,488 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mindfulness App</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Mindfulness App (Basic)</title>
+  <style>
+    /* CSS from style.css */
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    h1, h2 {
+        text-align: center;
+        color: #5a5a5a;
+    }
+
+    #phase1, #phase2, #phase3, #results {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      margin-right: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 8px 15px;
+      background-color: #5c67f2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    button:hover {
+      background-color: #4a54cc;
+    }
+
+    #thoughtList, #thoughtListPhase3 {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    #thoughtList li, #thoughtListPhase3 li {
+      margin-bottom: 8px;
+      padding: 10px;
+      background-color: #e9e9e9;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+     #thoughtList li span.count, #thoughtListPhase3 li span.count {
+        font-weight: bold;
+        background-color: #5c67f2;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 10px; /* Add some space between text and count */
+     }
+
+
+    #thoughtList li:hover, #thoughtListPhase3 li:hover {
+        background-color: #dcdcdc;
+    }
+
+    #timer {
+      font-size: 1.5em;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px 0;
+      color: #5c67f2;
+    }
+
+    #comparison {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #e9f5ff;
+        border: 1px solid #b3d7ff;
+        border-radius: 5px;
+    }
+
+    /* Basic flow control styling */
+    .hidden {
+        display: none;
+    }
+
+  </style>
 </head>
 <body>
 
   <h1>Mindfulness App</h1>
 
   <div id="phase1">
-    <h2>Phase 1: Meditation</h2>
-    <input type="text" id="thoughtInput" placeholder="Enter thought (3 words max)">
-    <button id="addThought">Add Thought</button>
-    <ul id="thoughtList"></ul>
+    <h2>Phase 1: Meditation (Observe Thoughts)</h2>
+    <p>Sit comfortably, focus on your breath. When a thought arises, note it below (max 3 words) and click 'Add'. If the thought repeats, click on its entry in the list below to count it.</p>
+    <div>
+      <label for="meditationDuration">Duration (minutes): </label>
+      <input type="number" id="meditationDuration" value="5" min="1" max="60">
+    </div>
     <div id="timer">00:00</div>
-    <button id="startTimer">Start Timer</button>
-    <button id="stopTimer">Stop Timer</button>
+    <button id="startTimer">Start Phase 1</button>
+    <button id="stopTimer" class="hidden">End Phase 1 & Proceed</button>
+    <hr>
+    <input type="text" id="thoughtInput" placeholder="Enter thought (3 words max)" disabled>
+    <button id="addThought" disabled>Add Thought</button>
+    <ul id="thoughtList"></ul>
   </div>
 
-  <div id="phase2" style="display: none;">
-    <h2>Phase 2: Breathwork</h2>
-    <p><strong>Box Breathing:** Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, hold for 4 seconds.</p>
-    <p>Please follow the instructions above. You can repeat this cycle for a few minutes.</p>
+  <div id="phase2" class="hidden">
+    <h2>Phase 2: Guided Breathwork</h2>
+    <p>Follow a guided breathwork exercise. Choose one below or follow your own practice.</p>
+    <div id="breathworkOptions">
+        <button class="breathworkBtn" data-type="box">Start Box Breathing (Guided)</button>
+        <button class="breathworkBtn" data-type="478">Start 4-7-8 Breathing (Guided)</button>
+        <button id="skipBreathwork">Skip / Done with Breathwork</button>
+    </div>
+    <div id="breathworkGuide" style="margin-top: 15px; font-size: 1.2em; text-align: center;"></div>
   </div>
 
-  <div id="phase3" style="display: none;">
-    <h2>Phase 3: Meditation</h2>
-    <input type="text" id="thoughtInputPhase3" placeholder="Enter thought (3 words max)">
-    <button id="addThoughtPhase3">Add Thought</button>
+  <div id="phase3" class="hidden">
+    <h2>Phase 3: Meditation (Observe Thoughts Again)</h2>
+    <p>Return your focus to your breath. Note any thoughts that arise, just like in Phase 1.</p>
+    <div id="timerPhase3">00:00</div>
+    <button id="startTimerPhase3">Start Phase 3</button>
+    <button id="stopTimerPhase3" class="hidden">End Phase 3 & See Results</button>
+    <hr>
+    <input type="text" id="thoughtInputPhase3" placeholder="Enter thought (3 words max)" disabled>
+    <button id="addThoughtPhase3" disabled>Add Thought</button>
     <ul id="thoughtListPhase3"></ul>
   </div>
 
-  <div id="results" style="display: none;">
-    <h2>Results</h2>
+  <div id="results" class="hidden">
+    <h2>Results Comparison</h2>
+    <p>Here's a comparison of the thoughts noted before and after the breathwork:</p>
     <div id="comparison"></div>
+    <button id="startOver">Start Over</button>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // --- Phase 1 Variables ---
+    const phase1Div = document.getElementById('phase1');
+    const durationInput = document.getElementById('meditationDuration');
+    const timerDisplay = document.getElementById('timer');
+    const startTimerButton = document.getElementById('startTimer');
+    const stopTimerButton = document.getElementById('stopTimer');
+    const thoughtInput = document.getElementById('thoughtInput');
+    const addThoughtButton = document.getElementById('addThought');
+    const thoughtList = document.getElementById('thoughtList');
+    let thoughtsPhase1 = {}; // Store thought text and count { "thought text": count }
+    let timerInterval;
+    let secondsRemaining;
+    let phase1Duration = 0; // To store the duration for phase 3
+
+    // --- Phase 2 Variables ---
+    const phase2Div = document.getElementById('phase2');
+    const breathworkOptionsDiv = document.getElementById('breathworkOptions');
+    const breathworkGuideDiv = document.getElementById('breathworkGuide');
+    const skipBreathworkButton = document.getElementById('skipBreathwork');
+    let breathInterval;
+
+    // --- Phase 3 Variables ---
+    const phase3Div = document.getElementById('phase3');
+    const timerDisplayPhase3 = document.getElementById('timerPhase3');
+    const startTimerPhase3Button = document.getElementById('startTimerPhase3');
+    const stopTimerPhase3Button = document.getElementById('stopTimerPhase3');
+    const thoughtInputPhase3 = document.getElementById('thoughtInputPhase3');
+    const addThoughtButtonPhase3 = document.getElementById('addThoughtPhase3');
+    const thoughtListPhase3 = document.getElementById('thoughtListPhase3');
+    let thoughtsPhase3 = {};
+    let timerIntervalPhase3;
+    let secondsRemainingPhase3;
+
+    // --- Results Variables ---
+    const resultsDiv = document.getElementById('results');
+    const comparisonDiv = document.getElementById('comparison');
+    const startOverButton = document.getElementById('startOver');
+
+    // --- Utility Functions ---
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    function updateThoughtList(listElement, thoughtsObject) {
+        listElement.innerHTML = ''; // Clear the list
+        for (const thought in thoughtsObject) {
+            const listItem = document.createElement('li');
+            listItem.textContent = thought; // Just the text
+
+            const countSpan = document.createElement('span');
+            countSpan.className = 'count';
+            countSpan.textContent = thoughtsObject[thought]; // The count
+            listItem.appendChild(countSpan);
+
+            listItem.addEventListener('click', () => {
+                thoughtsObject[thought]++; // Increment count in the object
+                updateThoughtList(listElement, thoughtsObject); // Redraw the list
+            });
+            listElement.appendChild(listItem);
+        }
+    }
+
+    function addThoughtToList(thought, thoughtsObject, listElement) {
+        const cleanedThought = thought.trim().toLowerCase(); // Normalize
+        if (cleanedThought.split(' ').length <= 3 && cleanedThought !== '') {
+            if (!thoughtsObject[cleanedThought]) {
+                thoughtsObject[cleanedThought] = 1; // Start count at 1
+            } else {
+                thoughtsObject[cleanedThought]++; // Increment if exists (though adding usually means first time)
+            }
+            updateThoughtList(listElement, thoughtsObject);
+            return true; // Indicate success
+        }
+        alert("Thought must be 3 words or less and not empty.");
+        return false; // Indicate failure
+    }
+
+
+    // --- Phase 1 Logic ---
+    startTimerButton.addEventListener('click', () => {
+        phase1Duration = parseInt(durationInput.value) * 60;
+        if (isNaN(phase1Duration) || phase1Duration <= 0) {
+            alert("Please enter a valid duration.");
+            return;
+        }
+        secondsRemaining = phase1Duration;
+        timerDisplay.textContent = formatTime(secondsRemaining);
+
+        startTimerButton.classList.add('hidden');
+        stopTimerButton.classList.remove('hidden');
+        durationInput.disabled = true;
+        thoughtInput.disabled = false;
+        addThoughtButton.disabled = false;
+
+        timerInterval = setInterval(() => {
+            secondsRemaining--;
+            timerDisplay.textContent = formatTime(secondsRemaining);
+            if (secondsRemaining <= 0) {
+                stopPhase1();
+            }
+        }, 1000);
+    });
+
+    addThoughtButton.addEventListener('click', () => {
+        if (addThoughtToList(thoughtInput.value, thoughtsPhase1, thoughtList)) {
+           thoughtInput.value = ''; // Clear input on success
+        }
+    });
+
+    thoughtInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+             if (addThoughtToList(thoughtInput.value, thoughtsPhase1, thoughtList)) {
+                thoughtInput.value = ''; // Clear input on success
+            }
+        }
+    });
+
+    stopTimerButton.addEventListener('click', stopPhase1);
+
+    function stopPhase1() {
+        clearInterval(timerInterval);
+        timerDisplay.textContent = "Finished";
+        thoughtInput.disabled = true;
+        addThoughtButton.disabled = true;
+        stopTimerButton.classList.add('hidden'); // Hide stop button
+
+        // Transition to Phase 2
+        phase1Div.classList.add('hidden');
+        phase2Div.classList.remove('hidden');
+    }
+
+
+    // --- Phase 2 Logic ---
+    breathworkOptionsDiv.addEventListener('click', (e) => {
+        if (e.target.classList.contains('breathworkBtn')) {
+            const type = e.target.dataset.type;
+            startBreathwork(type);
+            breathworkOptionsDiv.classList.add('hidden'); // Hide options during guidance
+        }
+    });
+
+    skipBreathworkButton.addEventListener('click', () => {
+        stopBreathwork(); // Clean up any running interval
+        proceedToPhase3();
+    });
+
+    function startBreathwork(type) {
+        clearInterval(breathInterval); // Clear previous interval if any
+        let step = 0;
+        let instructions = [];
+        let durations = [];
+
+        if (type === 'box') {
+            instructions = ['Inhale...', 'Hold...', 'Exhale...', 'Hold...'];
+            durations = [4000, 4000, 4000, 4000]; // 4 seconds each
+        } else if (type === '478') {
+            instructions = ['Inhale...', 'Hold...', 'Exhale...'];
+            durations = [4000, 7000, 8000]; // 4, 7, 8 seconds
+        }
+
+        function updateGuidance() {
+            breathworkGuideDiv.textContent = instructions[step % instructions.length];
+            breathInterval = setTimeout(updateGuidance, durations[step % durations.length]);
+            step++;
+        }
+
+        updateGuidance(); // Start the cycle
+         // Add a stop button dynamically or re-enable the skip button as stop
+        skipBreathworkButton.textContent = "Stop Breathwork & Proceed"; // Change button text
+    }
+
+    function stopBreathwork() {
+         clearTimeout(breathInterval); // Use clearTimeout as we used setTimeout recursively
+         breathworkGuideDiv.textContent = ''; // Clear guide text
+         breathworkOptionsDiv.classList.remove('hidden'); // Show options again
+         skipBreathworkButton.textContent = "Skip / Done with Breathwork"; // Reset button text
+
+    }
+
+    function proceedToPhase3() {
+        phase2Div.classList.add('hidden');
+        phase3Div.classList.remove('hidden');
+        // Set timer for phase 3 to match phase 1
+        secondsRemainingPhase3 = phase1Duration;
+        timerDisplayPhase3.textContent = formatTime(secondsRemainingPhase3);
+    }
+
+
+    // --- Phase 3 Logic ---
+     startTimerPhase3Button.addEventListener('click', () => {
+        if (secondsRemainingPhase3 <= 0) {
+             alert("Phase 1 duration was not set correctly.");
+             return;
+        }
+        startTimerPhase3Button.classList.add('hidden');
+        stopTimerPhase3Button.classList.remove('hidden');
+        thoughtInputPhase3.disabled = false;
+        addThoughtButtonPhase3.disabled = false;
+
+        timerIntervalPhase3 = setInterval(() => {
+            secondsRemainingPhase3--;
+            timerDisplayPhase3.textContent = formatTime(secondsRemainingPhase3);
+            if (secondsRemainingPhase3 <= 0) {
+                stopPhase3();
+            }
+        }, 1000);
+    });
+
+    addThoughtButtonPhase3.addEventListener('click', () => {
+        if (addThoughtToList(thoughtInputPhase3.value, thoughtsPhase3, thoughtListPhase3)) {
+            thoughtInputPhase3.value = ''; // Clear input on success
+        }
+    });
+
+     thoughtInputPhase3.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+             if (addThoughtToList(thoughtInputPhase3.value, thoughtsPhase3, thoughtListPhase3)) {
+                 thoughtInputPhase3.value = ''; // Clear input on success
+            }
+        }
+    });
+
+
+    stopTimerPhase3Button.addEventListener('click', stopPhase3);
+
+    function stopPhase3() {
+        clearInterval(timerIntervalPhase3);
+        timerDisplayPhase3.textContent = "Finished";
+        thoughtInputPhase3.disabled = true;
+        addThoughtButtonPhase3.disabled = true;
+        stopTimerPhase3Button.classList.add('hidden');
+
+        // Transition to Results
+        phase3Div.classList.add('hidden');
+        resultsDiv.classList.remove('hidden');
+        displayResults();
+    }
+
+    // --- Results Logic ---
+    function displayResults() {
+        comparisonDiv.innerHTML = ''; // Clear previous results
+        const allThoughts = new Set([...Object.keys(thoughtsPhase1), ...Object.keys(thoughtsPhase3)]);
+
+        if (allThoughts.size === 0) {
+            comparisonDiv.innerHTML = "<p>No thoughts were logged in either phase.</p>";
+            return;
+        }
+
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Thought</th>
+                    <th>Phase 1 Count</th>
+                    <th>Phase 3 Count</th>
+                    <th>Change</th>
+                </tr>
+            </thead>
+            <tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+
+        allThoughts.forEach(thought => {
+            const count1 = thoughtsPhase1[thought] || 0;
+            const count3 = thoughtsPhase3[thought] || 0;
+            const change = count3 - count1;
+            let changeText = change === 0 ? '-' : (change > 0 ? `+${change}` : `${change}`);
+            let changeClass = change === 0 ? '' : (change > 0 ? 'increase' : 'decrease'); // Optional: for styling
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${thought}</td>
+                <td>${count1}</td>
+                <td>${count3}</td>
+                <td class="${changeClass}">${changeText}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        comparisonDiv.appendChild(table);
+
+        // Add some summary text
+        let totalThoughts1 = Object.values(thoughtsPhase1).reduce((sum, count) => sum + count, 0);
+        let totalThoughts3 = Object.values(thoughtsPhase3).reduce((sum, count) => sum + count, 0);
+        let summaryP = document.createElement('p');
+        summaryP.innerHTML = `<strong>Total thoughts noted:</strong> Phase 1: ${totalThoughts1}, Phase 3: ${totalThoughts3}.`;
+        comparisonDiv.appendChild(summaryP);
+
+
+    }
+
+     startOverButton.addEventListener('click', () => {
+         // Reset variables
+         thoughtsPhase1 = {};
+         thoughtsPhase3 = {};
+         clearInterval(timerInterval);
+         clearInterval(timerIntervalPhase3);
+         stopBreathwork(); // Ensure breathwork guide stops
+
+         // Reset UI elements
+         thoughtList.innerHTML = '';
+         thoughtListPhase3.innerHTML = '';
+         comparisonDiv.innerHTML = '';
+         timerDisplay.textContent = "00:00";
+         timerDisplayPhase3.textContent = "00:00";
+         durationInput.disabled = false;
+         durationInput.value = "5";
+         thoughtInput.value = '';
+         thoughtInputPhase3.value = '';
+
+
+         // Reset visibility
+         phase1Div.classList.remove('hidden');
+         phase2Div.classList.add('hidden');
+         phase3Div.classList.add('hidden');
+         resultsDiv.classList.add('hidden');
+
+         startTimerButton.classList.remove('hidden');
+         stopTimerButton.classList.add('hidden');
+         startTimerPhase3Button.classList.remove('hidden'); // Make sure this is visible initially in phase 3 div structure
+         stopTimerPhase3Button.classList.add('hidden');
+
+         thoughtInput.disabled = true;
+         addThoughtButton.disabled = true;
+         thoughtInputPhase3.disabled = true;
+         addThoughtButtonPhase3.disabled = true;
+
+
+     });
+
+  </script>
 
 </body>
 </html>
