@@ -1,0 +1,19 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+#phase1, #phase2, #phase3, #results {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+#thoughtList, #thoughtListPhase3 {
+  list-style: none;
+  padding: 0;
+}
+
+#thoughtList li, #thoughtListPhase3 li {
+  margin-bottom: 5px;
+}
