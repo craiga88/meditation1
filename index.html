@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mindfulness App (Enhanced)</title>
+  <title>Mindfulness App (Sentiment Tracking)</title>
   <style>
-    /* CSS (Mostly unchanged, added styles for new elements) */
+    /* CSS (Mostly unchanged, added styles for new buttons and results section) */
     body {
       font-family: sans-serif;
       margin: 20px;
@@ -31,17 +31,18 @@
       margin-right: 5px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      min-width: 250px; /* Give input more space */
     }
 
     button {
       padding: 8px 15px;
-      background-color: #5c67f2;
+      background-color: #5c67f2; /* Default button blue */
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       margin-left: 5px;
-      margin-top: 5px; /* Add some top margin for spacing */
+      margin-top: 5px;
     }
 
     button:hover {
@@ -53,11 +54,25 @@
         cursor: not-allowed;
     }
 
+    /* Specific buttons for adding thoughts */
+    .add-thought-btn-anxious {
+        background-color: #dc3545; /* Red for anxious */
+    }
+    .add-thought-btn-anxious:hover {
+        background-color: #c82333;
+    }
+     .add-thought-btn-calm {
+        background-color: #28a745; /* Green for calm */
+     }
+      .add-thought-btn-calm:hover {
+        background-color: #218838;
+     }
+
 
     #thoughtList, #thoughtListPhase3 {
       list-style: none;
       padding: 0;
-      margin-top: 10px;
+      margin-top: 15px; /* More space above list */
     }
 
     #thoughtList li, #thoughtListPhase3 li {
@@ -70,10 +85,20 @@
       justify-content: space-between;
       align-items: center;
     }
+    /* Indicate sentiment visually in list - Optional */
+     #thoughtList li.anxious, #thoughtListPhase3 li.anxious {
+        border-left: 5px solid #dc3545; /* Red left border */
+        padding-left: 10px;
+     }
+      #thoughtList li.calm, #thoughtListPhase3 li.calm {
+        border-left: 5px solid #28a745; /* Green left border */
+        padding-left: 10px;
+     }
+
 
      #thoughtList li span.count, #thoughtListPhase3 li span.count {
         font-weight: bold;
-        background-color: #5c67f2;
+        background-color: #5c67f2; /* Use default blue for count background */
         color: white;
         padding: 2px 6px;
         border-radius: 4px;
@@ -85,7 +110,7 @@
         background-color: #dcdcdc;
     }
 
-    #timer, #timerPhase3, #breathworkTimer { /* Style all timers similarly */
+    #timer, #timerPhase3, #breathworkTimer {
       font-size: 1.5em;
       font-weight: bold;
       text-align: center;
@@ -93,6 +118,7 @@
       color: #5c67f2;
     }
 
+    /* Results styling */
     #comparison {
         margin-top: 15px;
         padding: 10px;
@@ -113,9 +139,27 @@
      #comparison th {
         background-color: #d1e7ff;
     }
-    /* Style for result change */
-    .decrease { color: green; }
-    .increase { color: red; }
+    .decrease { color: green; font-weight: bold; } /* Change in count */
+    .increase { color: red; font-weight: bold; }   /* Change in count */
+
+    #sentimentAnalysis {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+    }
+     #sentimentAnalysis h3 {
+        margin-top: 0;
+        text-align: center;
+        color: #495057;
+     }
+     #sentimentAnalysis p {
+        font-size: 1.1em;
+        margin-bottom: 8px;
+     }
+      #sentimentAnalysis .sentiment-anxious { color: #dc3545; font-weight: bold; }
+      #sentimentAnalysis .sentiment-calm { color: #28a745; font-weight: bold; }
 
 
     /* Basic flow control styling */
@@ -126,13 +170,13 @@
     /* Phase 2 Specific Styles */
      #breathworkGuide {
         margin-top: 15px;
-        font-size: 1.4em; /* Make guide text larger */
+        font-size: 1.4em;
         font-weight: bold;
         text-align: center;
         padding: 10px;
         background-color: #e9f5ff;
         border-radius: 5px;
-        min-height: 30px; /* Ensure space even when empty */
+        min-height: 30px;
      }
      #breathworkStatus {
         margin-top: 10px;
@@ -140,12 +184,12 @@
         font-size: 1.1em;
         color: #333;
      }
-     #proceedToPhase3Button { /* Make skip button distinct */
-        background-color: #ffc107; /* Yellow */
+     #proceedToPhase3Button {
+        background-color: #ffc107;
         color: #333;
-        display: block; /* Make it take full width */
+        display: block;
         width: 80%;
-        margin: 15px auto 0 auto; /* Center it */
+        margin: 15px auto 0 auto;
      }
       #proceedToPhase3Button:hover {
         background-color: #e0a800;
@@ -160,16 +204,20 @@
 
   <div id="phase1">
     <h2>Phase 1: Meditation (Observe Thoughts)</h2>
-    <p>Sit comfortably, focus on your breath. When a thought arises, note it below (max 3 words) and click 'Add'. If the thought repeats, click on its entry in the list below to count it.</p>
+    <p>Sit comfortably, focus on your breath. When a thought arises, note it below (max 3 words) and click 'Add Anxious' or 'Add Calm'. If the thought repeats, click on its entry in the list below to count it.</p>
     <div>
       <label for="meditationDuration">Duration (minutes): </label>
-      <input type="number" id="meditationDuration" value="2" min="1" max="60"> </div>
+      <input type="number" id="meditationDuration" value="2" min="1" max="60">
+    </div>
     <div id="timer">00:00</div>
     <button id="startTimer">Start Phase 1</button>
     <button id="stopTimer" class="hidden">End Phase 1 & Proceed</button>
     <hr>
-    <input type="text" id="thoughtInput" placeholder="Enter thought (3 words max)" disabled>
-    <button id="addThought" disabled>Add Thought</button>
+    <div>
+        <input type="text" id="thoughtInput" placeholder="Enter thought (3 words max)" disabled>
+        <button id="addAnxiousThought" class="add-thought-btn-anxious" disabled>Add Anxious</button>
+        <button id="addCalmThought" class="add-thought-btn-calm" disabled>Add Calm</button>
+    </div>
     <ul id="thoughtList"></ul>
   </div>
 
@@ -181,7 +229,8 @@
       <button class="breathworkBtn" data-type="478">Start 4-7-8 Breathing</button>
       <button id="skipBreathworkDirectly">Skip Breathwork Entirely</button>
     </div>
-    <div id="breathworkActive" class="hidden"> <div id="breathworkGuide">Ready...</div>
+    <div id="breathworkActive" class="hidden">
+        <div id="breathworkGuide">Ready...</div>
         <div id="breathworkStatus">
             <span>Elapsed Time: <span id="breathworkTimer">00:00</span></span> |
             <span>Rounds Completed: <span id="roundCounter">0</span></span>
@@ -192,20 +241,31 @@
 
   <div id="phase3" class="hidden">
     <h2>Phase 3: Meditation (Observe Thoughts Again)</h2>
-    <p>Return your focus to your breath. Note any thoughts that arise, just like in Phase 1. This phase will last the same duration as Phase 1.</p>
+    <p>Return your focus to your breath. Note thoughts and classify them as anxious or calm. Click existing thoughts to increment their count.</p>
     <div id="timerPhase3">00:00</div>
     <button id="startTimerPhase3">Start Phase 3</button>
     <button id="stopTimerPhase3" class="hidden">End Phase 3 & See Results</button>
     <hr>
-    <input type="text" id="thoughtInputPhase3" placeholder="Enter thought (3 words max)" disabled>
-    <button id="addThoughtPhase3" disabled>Add Thought</button>
+     <div>
+        <input type="text" id="thoughtInputPhase3" placeholder="Enter thought (3 words max)" disabled>
+        <button id="addAnxiousThoughtPhase3" class="add-thought-btn-anxious" disabled>Add Anxious</button>
+        <button id="addCalmThoughtPhase3" class="add-thought-btn-calm" disabled>Add Calm</button>
+    </div>
     <ul id="thoughtListPhase3"></ul>
   </div>
 
   <div id="results" class="hidden">
     <h2>Results Comparison</h2>
     <p>Here's a comparison of the thoughts noted before and after the breathwork:</p>
-    <div id="comparison"></div>
+    <div id="sentimentAnalysis">
+        <h3>Sentiment Breakdown</h3>
+        <div id="sentimentPhase1"></div>
+        <hr style="margin: 15px 0;">
+        <div id="sentimentPhase3"></div>
+    </div>
+    <div id="comparison">
+        <h3 style="text-align:center; margin-top: 20px;">Thought Frequency</h3>
+        </div>
     <button id="startOver">Start Over</button>
   </div>
 
@@ -217,8 +277,11 @@
     const startTimerButton = document.getElementById('startTimer');
     const stopTimerButton = document.getElementById('stopTimer');
     const thoughtInput = document.getElementById('thoughtInput');
-    const addThoughtButton = document.getElementById('addThought');
+    // NEW: Buttons for adding thoughts
+    const addAnxiousThoughtButton = document.getElementById('addAnxiousThought');
+    const addCalmThoughtButton = document.getElementById('addCalmThought');
     const thoughtList = document.getElementById('thoughtList');
+    // UPDATED: Data structure stores { count: number, sentiment: 'anxious' | 'calm' }
     let thoughtsPhase1 = {};
     let timerInterval;
     let secondsRemaining;
@@ -227,17 +290,16 @@
     // --- Phase 2 Variables ---
     const phase2Div = document.getElementById('phase2');
     const breathworkOptionsDiv = document.getElementById('breathworkOptions');
-    const breathworkActiveDiv = document.getElementById('breathworkActive'); // NEW container
+    const breathworkActiveDiv = document.getElementById('breathworkActive');
     const breathworkGuideDiv = document.getElementById('breathworkGuide');
-    const breathworkTimerDisplay = document.getElementById('breathworkTimer'); // NEW span
-    const roundCounterDisplay = document.getElementById('roundCounter'); // NEW span
-    const skipBreathworkDirectlyButton = document.getElementById('skipBreathworkDirectly'); // NEW button
-    const proceedToPhase3Button = document.getElementById('proceedToPhase3Button'); // Renamed button
-
-    let breathInterval; // For guidance steps
-    let breathworkElapsedInterval; // For overall timer
-    let breathworkRoundCount = 0; // NEW counter
-    let breathworkElapsedTime = 0; // NEW timer
+    const breathworkTimerDisplay = document.getElementById('breathworkTimer');
+    const roundCounterDisplay = document.getElementById('roundCounter');
+    const skipBreathworkDirectlyButton = document.getElementById('skipBreathworkDirectly');
+    const proceedToPhase3Button = document.getElementById('proceedToPhase3Button');
+    let breathInterval;
+    let breathworkElapsedInterval;
+    let breathworkRoundCount = 0;
+    let breathworkElapsedTime = 0;
 
     // --- Phase 3 Variables ---
     const phase3Div = document.getElementById('phase3');
@@ -245,15 +307,21 @@
     const startTimerPhase3Button = document.getElementById('startTimerPhase3');
     const stopTimerPhase3Button = document.getElementById('stopTimerPhase3');
     const thoughtInputPhase3 = document.getElementById('thoughtInputPhase3');
-    const addThoughtButtonPhase3 = document.getElementById('addThoughtPhase3');
+    // NEW: Buttons for adding thoughts
+    const addAnxiousThoughtPhase3Button = document.getElementById('addAnxiousThoughtPhase3');
+    const addCalmThoughtPhase3Button = document.getElementById('addCalmThoughtPhase3');
     const thoughtListPhase3 = document.getElementById('thoughtListPhase3');
+    // UPDATED: Data structure
     let thoughtsPhase3 = {};
     let timerIntervalPhase3;
     let secondsRemainingPhase3;
 
     // --- Results Variables ---
     const resultsDiv = document.getElementById('results');
-    const comparisonDiv = document.getElementById('comparison');
+    const comparisonDiv = document.getElementById('comparison'); // For the table
+    const sentimentAnalysisDiv = document.getElementById('sentimentAnalysis'); // For percentages
+    const sentimentPhase1Div = document.getElementById('sentimentPhase1');
+    const sentimentPhase3Div = document.getElementById('sentimentPhase3');
     const startOverButton = document.getElementById('startOver');
 
     // --- Utility Functions ---
@@ -263,49 +331,57 @@
       return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
+    // UPDATED: Function to draw the list based on the new data structure
     function updateThoughtList(listElement, thoughtsObject) {
-        listElement.innerHTML = '';
-        const sortedThoughts = Object.entries(thoughtsObject).sort(([,a],[,b]) => b-a); // Sort by count desc
+        listElement.innerHTML = ''; // Clear the list
+        // Sort by count descending
+        const sortedThoughts = Object.entries(thoughtsObject).sort(([,a],[,b]) => b.count - a.count);
 
-        for (const [thought, count] of sortedThoughts) {
+        for (const [thought, data] of sortedThoughts) {
             const listItem = document.createElement('li');
-            listItem.textContent = thought;
+            listItem.textContent = thought; // Just the text
+            listItem.classList.add(data.sentiment); // Add 'anxious' or 'calm' class for styling
 
             const countSpan = document.createElement('span');
             countSpan.className = 'count';
-            countSpan.textContent = count;
+            countSpan.textContent = data.count; // Get count from data object
             listItem.appendChild(countSpan);
 
-            // Re-add event listener for incrementing
+            // Add event listener to increment count on click
              listItem.addEventListener('click', () => {
-                thoughtsObject[thought]++;
-                updateThoughtList(listElement, thoughtsObject); // Redraw the list
-             }, { once: false }); // Ensure listener can fire multiple times
+                 thoughtsObject[thought].count++; // Increment count in the object
+                 updateThoughtList(listElement, thoughtsObject); // Redraw the list
+             });
 
             listElement.appendChild(listItem);
         }
     }
 
-
-    function addThoughtToList(thought, thoughtsObject, listElement) {
-        const cleanedThought = thought.trim().toLowerCase();
+    // UPDATED: Function to add a thought with sentiment
+    function addThoughtToList(thoughtText, thoughtsObject, listElement, sentiment) {
+        const cleanedThought = thoughtText.trim().toLowerCase(); // Normalize
         if (cleanedThought.split(' ').length <= 3 && cleanedThought !== '') {
             if (!thoughtsObject[cleanedThought]) {
-                thoughtsObject[cleanedThought] = 1;
+                // Add new thought with count 1 and specified sentiment
+                thoughtsObject[cleanedThought] = { count: 1, sentiment: sentiment };
             } else {
-                 // If adding via input field again, maybe don't increment?
-                 // Let's assume adding via input always means "first time" or reset intention
-                 // thoughtsObject[cleanedThought]++; // Incrementing handled by clicking the list item now
-                 thoughtsObject[cleanedThought] = thoughtsObject[cleanedThought] || 1; // Set to 1 if new
+                // If thought exists, clicking list item increments count.
+                // Adding via button maybe shouldn't automatically increment?
+                // Or maybe alert user it exists already? Let's alert for now.
+                 alert(`'${cleanedThought}' already logged. Click it in the list to increment count.`);
+                 return false; // Indicate not added/updated via this button press
+                // Alternatively: Just increment count here too?
+                // thoughtsObject[cleanedThought].count++;
             }
             updateThoughtList(listElement, thoughtsObject);
-            return true;
+            return true; // Indicate success
         }
-         if (cleanedThought !== '') { // Only alert if non-empty but invalid
+         if (cleanedThought !== '') {
             alert("Thought must be 3 words or less.");
          }
-        return false;
+        return false; // Indicate failure
     }
+
 
     // --- Phase 1 Logic ---
     startTimerButton.addEventListener('click', () => {
@@ -321,7 +397,9 @@
         stopTimerButton.classList.remove('hidden');
         durationInput.disabled = true;
         thoughtInput.disabled = false;
-        addThoughtButton.disabled = false;
+        // Enable add buttons
+        addAnxiousThoughtButton.disabled = false;
+        addCalmThoughtButton.disabled = false;
 
         timerInterval = setInterval(() => {
             secondsRemaining--;
@@ -332,19 +410,21 @@
         }, 1000);
     });
 
-    addThoughtButton.addEventListener('click', () => {
-        if (addThoughtToList(thoughtInput.value, thoughtsPhase1, thoughtList)) {
-           thoughtInput.value = '';
+    // Event listeners for the new add buttons
+    addAnxiousThoughtButton.addEventListener('click', () => {
+         if (addThoughtToList(thoughtInput.value, thoughtsPhase1, thoughtList, 'anxious')) {
+           thoughtInput.value = ''; // Clear input on success
+        }
+    });
+    addCalmThoughtButton.addEventListener('click', () => {
+         if (addThoughtToList(thoughtInput.value, thoughtsPhase1, thoughtList, 'calm')) {
+           thoughtInput.value = ''; // Clear input on success
         }
     });
 
-    thoughtInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-             if (addThoughtToList(thoughtInput.value, thoughtsPhase1, thoughtList)) {
-                thoughtInput.value = '';
-            }
-        }
-    });
+    // Optional: Allow Enter key press after typing to add (maybe default to anxious or require button click?)
+    // For simplicity, let's require button clicks for sentiment.
+    // thoughtInput.addEventListener('keypress', function (e) { ... }); // Removed Enter key listener
 
     stopTimerButton.addEventListener('click', stopPhase1);
 
@@ -352,66 +432,59 @@
         clearInterval(timerInterval);
         timerDisplay.textContent = "Finished";
         thoughtInput.disabled = true;
-        addThoughtButton.disabled = true;
+        addAnxiousThoughtButton.disabled = true; // Disable add buttons
+        addCalmThoughtButton.disabled = true;
         stopTimerButton.classList.add('hidden');
 
-        // Transition to Phase 2
         phase1Div.classList.add('hidden');
         phase2Div.classList.remove('hidden');
-        breathworkOptionsDiv.classList.remove('hidden'); // Show options
-        breathworkActiveDiv.classList.add('hidden'); // Hide active area initially
+        breathworkOptionsDiv.classList.remove('hidden');
+        breathworkActiveDiv.classList.add('hidden');
     }
 
-    // --- Phase 2 Logic ---
+
+    // --- Phase 2 Logic (Unchanged from previous version) ---
     breathworkOptionsDiv.addEventListener('click', (e) => {
         if (e.target.classList.contains('breathworkBtn')) {
             const type = e.target.dataset.type;
             startBreathwork(type);
         } else if (e.target.id === 'skipBreathworkDirectly') {
-            proceedToPhase3(); // Skip directly without starting guidance
+            proceedToPhase3();
         }
     });
 
-    // Listener for the main "Stop/Proceed" button (available once breathwork starts)
     proceedToPhase3Button.addEventListener('click', () => {
-        stopBreathwork(); // Clean up timers
-        proceedToPhase3(); // Transition
+        stopBreathwork();
+        proceedToPhase3();
     });
 
-
     function startBreathwork(type) {
-        breathworkOptionsDiv.classList.add('hidden'); // Hide initial choices
-        breathworkActiveDiv.classList.remove('hidden'); // Show timer, counter, guide area
+        breathworkOptionsDiv.classList.add('hidden');
+        breathworkActiveDiv.classList.remove('hidden');
 
-        // Reset counters and timers
         clearInterval(breathInterval);
-        clearTimeout(breathInterval); // Use clear timeout if using recursive setTimeout
+        clearTimeout(breathInterval);
         clearInterval(breathworkElapsedInterval);
         breathworkRoundCount = 0;
         breathworkElapsedTime = 0;
         roundCounterDisplay.textContent = breathworkRoundCount;
         breathworkTimerDisplay.textContent = formatTime(breathworkElapsedTime);
 
-        // Start elapsed timer
         breathworkElapsedInterval = setInterval(() => {
              breathworkElapsedTime++;
              breathworkTimerDisplay.textContent = formatTime(breathworkElapsedTime);
         }, 1000);
 
-
-        // Guidance logic
         let step = 0;
         let instructions = [];
-        let durations = []; // in milliseconds
+        let durations = [];
 
         if (type === 'box') {
             instructions = ['Inhale (4s)...', 'Hold (4s)...', 'Exhale (4s)...', 'Hold (4s)...'];
             durations = [4000, 4000, 4000, 4000];
         } else if (type === '478') {
-            instructions = ['Inhale (4s)...', 'Hold (7s)...', 'Exhale (8s)...'];
-            // Add a small pause before repeating for clarity
-            durations = [4000, 7000, 8000, 1000]; // Added 1s pause
-            instructions.push("Pause (1s)...");
+            instructions = ['Inhale (4s)...', 'Hold (7s)...', 'Exhale (8s)...', "Pause (1s)..."];
+            durations = [4000, 7000, 8000, 1000];
         }
 
         const totalCycleSteps = instructions.length;
@@ -420,44 +493,40 @@
             const currentStepIndex = step % totalCycleSteps;
             breathworkGuideDiv.textContent = instructions[currentStepIndex];
 
-            // Increment round count AFTER the last step of a cycle completes
             if (currentStepIndex === totalCycleSteps - 1) {
                 breathworkRoundCount++;
                 roundCounterDisplay.textContent = breathworkRoundCount;
             }
-
             breathInterval = setTimeout(updateGuidance, durations[currentStepIndex]);
             step++;
         }
-
-        updateGuidance(); // Start the cycle
+        updateGuidance();
     }
 
     function stopBreathwork() {
-         clearTimeout(breathInterval); // Stop guidance timer
-         clearInterval(breathworkElapsedInterval); // Stop elapsed timer
-         breathworkGuideDiv.textContent = 'Stopped'; // Optional: indicate stopped state
+         clearTimeout(breathInterval);
+         clearInterval(breathworkElapsedInterval);
+         breathworkGuideDiv.textContent = 'Stopped';
     }
 
     function proceedToPhase3() {
-        stopBreathwork(); // Ensure everything is stopped before proceeding
+        stopBreathwork();
         phase2Div.classList.add('hidden');
         phase3Div.classList.remove('hidden');
-        // Set timer for phase 3 to match phase 1
         secondsRemainingPhase3 = phase1Duration;
-         if (secondsRemainingPhase3 <= 0) { // Fallback if P1 duration wasn't set
+         if (secondsRemainingPhase3 <= 0) {
              console.warn("Phase 1 duration not set, defaulting Phase 3 to 2 minutes.");
              secondsRemainingPhase3 = 120;
          }
         timerDisplayPhase3.textContent = formatTime(secondsRemainingPhase3);
-        // Ensure phase 3 starts clean
+
         startTimerPhase3Button.classList.remove('hidden');
         stopTimerPhase3Button.classList.add('hidden');
         thoughtInputPhase3.disabled = true;
-        addThoughtButtonPhase3.disabled = true;
-        thoughtListPhase3.innerHTML = ''; // Clear phase 3 list if starting over mid-way
+        addAnxiousThoughtPhase3Button.disabled = true; // Ensure buttons start disabled
+        addCalmThoughtPhase3Button.disabled = true;
+        thoughtListPhase3.innerHTML = ''; // Clear phase 3 list
         thoughtsPhase3 = {}; // Clear phase 3 thoughts object
-
     }
 
 
@@ -470,7 +539,10 @@
         startTimerPhase3Button.classList.add('hidden');
         stopTimerPhase3Button.classList.remove('hidden');
         thoughtInputPhase3.disabled = false;
-        addThoughtButtonPhase3.disabled = false;
+        // Enable add buttons
+        addAnxiousThoughtPhase3Button.disabled = false;
+        addCalmThoughtPhase3Button.disabled = false;
+
 
         timerIntervalPhase3 = setInterval(() => {
             secondsRemainingPhase3--;
@@ -481,19 +553,18 @@
         }, 1000);
     });
 
-    addThoughtButtonPhase3.addEventListener('click', () => {
-        if (addThoughtToList(thoughtInputPhase3.value, thoughtsPhase3, thoughtListPhase3)) {
-            thoughtInputPhase3.value = '';
-        }
+    // Event listeners for phase 3 add buttons
+     addAnxiousThoughtPhase3Button.addEventListener('click', () => {
+         if (addThoughtToList(thoughtInputPhase3.value, thoughtsPhase3, thoughtListPhase3, 'anxious')) {
+            thoughtInputPhase3.value = ''; // Clear input on success
+         }
+    });
+     addCalmThoughtPhase3Button.addEventListener('click', () => {
+         if (addThoughtToList(thoughtInputPhase3.value, thoughtsPhase3, thoughtListPhase3, 'calm')) {
+            thoughtInputPhase3.value = ''; // Clear input on success
+         }
     });
 
-     thoughtInputPhase3.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-             if (addThoughtToList(thoughtInputPhase3.value, thoughtsPhase3, thoughtListPhase3)) {
-                 thoughtInputPhase3.value = '';
-            }
-        }
-    });
 
     stopTimerPhase3Button.addEventListener('click', stopPhase3);
 
@@ -501,23 +572,77 @@
         clearInterval(timerIntervalPhase3);
         timerDisplayPhase3.textContent = "Finished";
         thoughtInputPhase3.disabled = true;
-        addThoughtButtonPhase3.disabled = true;
+        addAnxiousThoughtPhase3Button.disabled = true; // Disable add buttons
+        addCalmThoughtPhase3Button.disabled = true;
         stopTimerPhase3Button.classList.add('hidden');
 
-        // Transition to Results
         phase3Div.classList.add('hidden');
         resultsDiv.classList.remove('hidden');
         displayResults();
     }
 
     // --- Results Logic ---
+    // UPDATED: Function includes sentiment analysis calculation
     function displayResults() {
-        comparisonDiv.innerHTML = '';
+        comparisonDiv.innerHTML = ''; // Clear previous frequency table
+        sentimentPhase1Div.innerHTML = ''; // Clear previous sentiment analysis
+        sentimentPhase3Div.innerHTML = '';
+
         const allThoughts = new Set([...Object.keys(thoughtsPhase1), ...Object.keys(thoughtsPhase3)]);
 
+        let totalCount1 = 0;
+        let anxiousCount1 = 0;
+        let calmCount1 = 0;
+        let totalCount3 = 0;
+        let anxiousCount3 = 0;
+        let calmCount3 = 0;
+
+        // --- Calculate Sentiment Totals ---
+        for (const thought in thoughtsPhase1) {
+            const data = thoughtsPhase1[thought];
+            totalCount1 += data.count;
+            if (data.sentiment === 'anxious') {
+                anxiousCount1 += data.count;
+            } else if (data.sentiment === 'calm') {
+                calmCount1 += data.count;
+            }
+        }
+         for (const thought in thoughtsPhase3) {
+            const data = thoughtsPhase3[thought];
+            totalCount3 += data.count;
+            if (data.sentiment === 'anxious') {
+                anxiousCount3 += data.count;
+            } else if (data.sentiment === 'calm') {
+                calmCount3 += data.count;
+            }
+        }
+
+        // --- Display Sentiment Percentages ---
+        const calculatePercentage = (part, total) => total === 0 ? 0 : ((part / total) * 100).toFixed(1);
+
+        sentimentPhase1Div.innerHTML = `
+            <h4>Phase 1 Sentiment</h4>
+            <p>Total Thoughts: ${totalCount1}</p>
+            <p><span class="sentiment-anxious">Anxious:</span> ${anxiousCount1} (${calculatePercentage(anxiousCount1, totalCount1)}%)</p>
+            <p><span class="sentiment-calm">Calm:</span> ${calmCount1} (${calculatePercentage(calmCount1, totalCount1)}%)</p>
+        `;
+         sentimentPhase3Div.innerHTML = `
+            <h4>Phase 3 Sentiment</h4>
+            <p>Total Thoughts: ${totalCount3}</p>
+            <p><span class="sentiment-anxious">Anxious:</span> ${anxiousCount3} (${calculatePercentage(anxiousCount3, totalCount3)}%)</p>
+            <p><span class="sentiment-calm">Calm:</span> ${calmCount3} (${calculatePercentage(calmCount3, totalCount3)}%)</p>
+        `;
+
+
+        // --- Display Frequency Table ---
+         comparisonDiv.innerHTML = '<h3 style="text-align:center; margin-top: 20px;">Thought Frequency</h3>'; // Add header back
+
         if (allThoughts.size === 0) {
-            comparisonDiv.innerHTML = "<p>No thoughts were logged in either phase.</p>";
-            return;
+            comparisonDiv.innerHTML += "<p>No thoughts were logged in either phase.</p>";
+             // Also update sentiment analysis text if needed
+             sentimentPhase1Div.innerHTML += "<p>(No thoughts logged)</p>";
+             sentimentPhase3Div.innerHTML += "<p>(No thoughts logged)</p>";
+            return; // Don't draw table if no thoughts
         }
 
         const table = document.createElement('table');
@@ -525,6 +650,7 @@
             <thead>
                 <tr>
                     <th>Thought</th>
+                    <th>Sentiment</th>
                     <th>Phase 1 Count</th>
                     <th>Phase 3 Count</th>
                     <th>Change</th>
@@ -533,19 +659,27 @@
             <tbody></tbody>`;
         const tbody = table.querySelector('tbody');
 
-        // Convert Set to Array and sort alphabetically for consistent order
         const sortedAllThoughts = Array.from(allThoughts).sort();
 
         sortedAllThoughts.forEach(thought => {
-            const count1 = thoughtsPhase1[thought] || 0;
-            const count3 = thoughtsPhase3[thought] || 0;
+            const data1 = thoughtsPhase1[thought] || { count: 0, sentiment: '-' }; // Default if not in phase 1
+            const data3 = thoughtsPhase3[thought] || { count: 0, sentiment: '-' }; // Default if not in phase 3
+            // Determine sentiment to display (prefer phase 1's if available, else phase 3's, else '-')
+            const sentimentDisplay = data1.sentiment !== '-' ? data1.sentiment : data3.sentiment;
+
+            const count1 = data1.count;
+            const count3 = data3.count;
             const change = count3 - count1;
             let changeText = change === 0 ? '-' : (change > 0 ? `+${change}` : `${change}`);
             let changeClass = change === 0 ? '' : (change > 0 ? 'increase' : 'decrease');
 
             const row = document.createElement('tr');
+             // Add class to row based on sentiment for potential styling
+             if (sentimentDisplay !== '-') row.classList.add(sentimentDisplay);
+
             row.innerHTML = `
                 <td>${thought}</td>
+                <td>${sentimentDisplay}</td>
                 <td>${count1}</td>
                 <td>${count3}</td>
                 <td class="${changeClass}">${changeText}</td>
@@ -554,43 +688,39 @@
         });
 
         comparisonDiv.appendChild(table);
-
-        let totalThoughts1 = Object.values(thoughtsPhase1).reduce((sum, count) => sum + count, 0);
-        let totalThoughts3 = Object.values(thoughtsPhase3).reduce((sum, count) => sum + count, 0);
-        let summaryP = document.createElement('p');
-        summaryP.style.marginTop = '15px'; // Add some space above summary
-        summaryP.innerHTML = `<strong>Total thoughts noted:</strong> Phase 1: ${totalThoughts1}, Phase 3: ${totalThoughts3}.`;
-        comparisonDiv.appendChild(summaryP);
     }
 
+     // --- Start Over Logic ---
      startOverButton.addEventListener('click', () => {
-         // Reset variables
          thoughtsPhase1 = {};
          thoughtsPhase3 = {};
          clearInterval(timerInterval);
          clearInterval(timerIntervalPhase3);
-         stopBreathwork(); // Ensure breathwork guide stops and timers cleared
+         stopBreathwork();
 
-         // Reset UI elements
          thoughtList.innerHTML = '';
          thoughtListPhase3.innerHTML = '';
-         comparisonDiv.innerHTML = '';
+         comparisonDiv.innerHTML = ''; // Clear table area
+         sentimentPhase1Div.innerHTML = ''; // Clear sentiment area 1
+         sentimentPhase3Div.innerHTML = ''; // Clear sentiment area 3
+         sentimentAnalysisDiv.classList.remove('hidden'); // Ensure sentiment area wrapper is visible if results were shown
+
+
          timerDisplay.textContent = "00:00";
          timerDisplayPhase3.textContent = "00:00";
-         breathworkTimerDisplay.textContent = "00:00"; // Reset breathwork timer display
-         roundCounterDisplay.textContent = "0"; // Reset round counter display
+         breathworkTimerDisplay.textContent = "00:00";
+         roundCounterDisplay.textContent = "0";
          durationInput.disabled = false;
-         durationInput.value = "2"; // Reset duration to default
+         durationInput.value = "2";
          thoughtInput.value = '';
          thoughtInputPhase3.value = '';
 
-         // Reset visibility and button states
          phase1Div.classList.remove('hidden');
          phase2Div.classList.add('hidden');
          phase3Div.classList.add('hidden');
          resultsDiv.classList.add('hidden');
-         breathworkOptionsDiv.classList.remove('hidden'); // Show breathwork options
-         breathworkActiveDiv.classList.add('hidden'); // Hide active breathwork area
+         breathworkOptionsDiv.classList.remove('hidden');
+         breathworkActiveDiv.classList.add('hidden');
 
          startTimerButton.classList.remove('hidden');
          stopTimerButton.classList.add('hidden');
@@ -598,9 +728,11 @@
          stopTimerPhase3Button.classList.add('hidden');
 
          thoughtInput.disabled = true;
-         addThoughtButton.disabled = true;
+         addAnxiousThoughtButton.disabled = true;
+         addCalmThoughtButton.disabled = true;
          thoughtInputPhase3.disabled = true;
-         addThoughtButtonPhase3.disabled = true;
+         addAnxiousThoughtPhase3Button.disabled = true;
+         addCalmThoughtPhase3Button.disabled = true;
      });
 
   </script>
