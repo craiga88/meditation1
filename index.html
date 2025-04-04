@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mindfulness App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Mindfulness App</h1>
+
+  <div id="phase1">
+    <h2>Phase 1: Meditation</h2>
+    <input type="text" id="thoughtInput" placeholder="Enter thought (3 words max)">
+    <button id="addThought">Add Thought</button>
+    <ul id="thoughtList"></ul>
+    <div id="timer">00:00</div>
+    <button id="startTimer">Start Timer</button>
+    <button id="stopTimer">Stop Timer</button>
+  </div>
+
+  <div id="phase2" style="display: none;">
+    <h2>Phase 2: Breathwork</h2>
+    <p><strong>Box Breathing:** Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, hold for 4 seconds.</p>
+    <p>Please follow the instructions above. You can repeat this cycle for a few minutes.</p>
+  </div>
+
+  <div id="phase3" style="display: none;">
+    <h2>Phase 3: Meditation</h2>
+    <input type="text" id="thoughtInputPhase3" placeholder="Enter thought (3 words max)">
+    <button id="addThoughtPhase3">Add Thought</button>
+    <ul id="thoughtListPhase3"></ul>
+  </div>
+
+  <div id="results" style="display: none;">
+    <h2>Results</h2>
+    <div id="comparison"></div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
